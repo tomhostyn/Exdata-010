@@ -34,8 +34,7 @@ plot2 <- function (){
         plot (Global_active_power, type = "l", col="black",xaxt = "n",
               xlab="", ylab = "Global Active Power (kilowatts)")
              )  
-  axis (1, c(0, length (HPC$Global_active_power)/2, length (HPC$Global_active_power)), c("Thu", "Fri", "Sat"))
-  
+  axis (1, c(0, length (HPC$Global_active_power)/2, length (HPC$Global_active_power)), c("Thu", "Fri", "Sat"))  
 }
 
 plot3 <- function () {
@@ -60,7 +59,6 @@ plot4b <- function () {
               xlab="datetime", ylab = "Voltage")
   )  
   axis (1, c(0, length (HPC$Global_active_power)/2, length (HPC$Global_active_power)), c("Thu", "Fri", "Sat"))
-  
 }
 
 plot4d <- function () {
@@ -71,7 +69,6 @@ plot4d <- function () {
   axis (1, c(0, length (HPC$Global_active_power)/2, length (HPC$Global_active_power)), c("Thu", "Fri", "Sat"))
   
 }
-
 
 plot4 <- function () {
   par(mfrow=c(2,2))
