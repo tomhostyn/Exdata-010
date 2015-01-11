@@ -1,13 +1,13 @@
+library (dplyr)
 
-
-loadData <- fuction () {
+loadData <- function () {
   NEI <- readRDS("summarySCC_PM25.rds")
   SCC <- readRDS("Source_Classification_Code.rds")
 }
 
 saveplot <- function (plot_f){
-  filename <- gsub (" ", "", paste (as.character(substitute(plot_f)), ".png"))
-  filename <- gsub ("project2", filename)
+  filename <- paste ("project2/", as.character(substitute(plot_f)), ".png", sep="")
+  #filename <- paste ("project2/", filename, sep="")
   png(file=filename, width=480,height=480)
   plot_f()  
   dev.off()
@@ -15,5 +15,8 @@ saveplot <- function (plot_f){
 
 
 plot1 <- function () {
-  
+  by_year <- group_by(NEI, year) %>% 
+    summarize (sum = sum (Emissions))
+    plot (by_year, ylab = "Total PM2.5 Emission (tons)")
+    abline (lm (sum ~ year , data = by_year))
 }

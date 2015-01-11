@@ -16,7 +16,7 @@ readHPC <- function () {
 }
 
 saveplot <- function (plot_f){
-  filename <- gsub (" ", "", paste (as.character(substitute(plot_f)), ".png"))
+  filename <- paste ("project2/", as.character(substitute(plot_f)), ".png", sep="")
   png(file=filename, width=480,height=480)
   plot_f()  
   dev.off()
