@@ -20,7 +20,8 @@ saveggplot <- function (plot_f){
 plot1 <- function () {
   by_year <- group_by(NEI, year) %>% 
     summarize (sum = sum (Emissions))
-    plot (by_year, main = "PM2.5 Emissions (US Total)", ylab = "PM2.5 Emitted (tons)", col="red", pch=2)
+    plot (by_year, main = "PM2.5 Emissions (US Total)", 
+          ylab = "PM2.5 Emitted (tons)", col="red", pch=2)
     abline (lm (sum ~ year , data = by_year))
 }
 
@@ -29,7 +30,8 @@ plot2 <- function () {
     filter (fips == "24510") %>%
     group_by(year) %>% 
     summarize (sum = sum (Emissions))
-  plot (by_year, main = "PM2.5 Emissions (Baltimore City, MD)", ylab = "PM2.5 Emitted (tons)", col="red", pch=2)
+  plot (by_year, main = "PM2.5 Emissions (Baltimore City, MD)", 
+        ylab = "PM2.5 Emitted (tons)", col="red", pch=2)
   abline (lm (sum ~ year , data = by_year))
 }
 
@@ -59,10 +61,11 @@ plot4 <- function () {
 plot5 <- function () {
   by_year <- NEI %>%
     filter (type == "ON-ROAD") %>%
+    filter (fips == "24510") %>%
     group_by(year) %>% 
     summarize (sum = sum (Emissions))
     qplot (year, sum, data = by_year, geom = c("point", "line"), 
-           main = "Vehicle Combustion-related PM2.5 Emissions (US Total)", 
+           main = "Vehicle Combustion-related PM2.5 Emissions (Baltimore City, MD)", 
            ylab= "PM2.5 Emitted (tons)",
            xlab= "Year")    
 }
