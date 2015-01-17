@@ -151,23 +151,22 @@ SetupData <- function () {
 #  Plot the data !
 #
 
-plot1_old <- function () {
-  #
-  #  plot Weekly active users
-  #
-  start <- min(gTags$date)
-  
-  
-  weeklyUsers  <- gTags %>%
-    transform (week = date - wday(date)) %>%
-    group_by(week) %>% 
-    summarize (sum = length(unique (user)))
-  
-  qplot (week, sum, data = weeklyUsers, geom = c("point", "line", "smooth"), method="lm", 
-         main = "Weekly active users", 
-         ylab= "Unique users",
-         xlab= "Time") 
+saveggplot <- function (plot_f){
+  filename <- paste ("tagproject/", as.character(substitute(plot_f)), ".png", sep="")
+  p <- plot_f()
+  ggsave(filename=filename, plot=p, dpi=100)
 }
+
+saveAll <- function () {
+  saveggplot(plotUsers1)
+  saveggplot(plotUsers2)
+  saveggplot(plotUsers3)
+  saveggplot(plotUsers4)
+  saveggplot(plotUsers5)
+  saveggplot(plotChains1)
+  saveggplot(plotChains2)
+}
+
 
 plotUsers1 <- function () {
   #
@@ -184,6 +183,78 @@ plotUsers1 <- function () {
     geom_point() + geom_line() + geom_smooth(method="lm") +
     labs (x = "Week", y = "Unique users", title="Unique weekly users")
 }
+
+plotUsers2 <- function () {
+  #
+  #  plot Weekly created tags per gender
+  #  using ggplot
+  start <- min(gTags$date)
+  
+  by.gender  <- gTags %>%
+    inner_join(gUserPool, by="userID") %>%
+    transform (week = date - wday(date)) %>%
+    group_by(week, gender) %>% 
+    summarize (sum = length(unique (chain)))
+    
+  ggplot (by.gender, aes(x=week, y=sum)) + 
+    facet_wrap(~gender) +
+    geom_point() + geom_line() + geom_smooth(method="lm") +
+    labs (x = "Week", y = "created tags", title="Created tags over time (per Gender)")
+}
+
+plotUsers3 <- function () {
+  #
+  #  plot Weekly created tags per age group
+  #  using ggplot
+  start <- min(gTags$date)
+  
+  by.age  <- gTags %>%
+    inner_join(gUserPool, by="userID") %>%
+    transform (week = date - wday(date)) %>%
+    transform (age.group = floor (age/10) * 10 ) %>%
+    group_by(week, age.group) %>% 
+    summarize (sum = length(unique (chain)))
+  
+  ggplot (by.age, aes(x=week, y=sum)) + 
+    facet_wrap(~age.group) +
+    geom_point() + geom_line() + geom_smooth(method="lm") +
+    labs (x = "Week", y = "Created tags", title="Created tags over time (per age group)")
+}
+
+plotUsers4 <- function () {
+  #
+  #  plot created tags per age group & gender
+  #  using ggplot
+  start <- min(gTags$date)
+  
+  by.age  <- gTags %>%
+    inner_join(gUserPool, by="userID") %>%
+    group_by(age, gender) 
+  
+  ggplot (by.age, aes(x=age)) + 
+    facet_wrap(~gender) +
+    geom_histogram(binwidth=1, colour="black", fill="white")+
+    labs (x = "Age", y = "Created tags", title="Created tags by age")
+}
+
+plotUsers5 <- function () {
+  #
+  #  plot created tags per age group & gender (relative)
+  #  using ggplot
+    
+  by.age  <- gTags %>%
+    inner_join(gUserPool, by="userID") %>%
+    transform (age = floor(age/5) * 5) %>%
+    group_by(gender, age)  %>% 
+    summarize (sum = length(id)/length(unique(userID)))
+  
+  ggplot (by.age, aes(x=age, y = sum)) + 
+    facet_wrap(~gender) +
+    geom_point() +
+    labs (x = "Age", y = "Created tags", title="Created tags by age (relative)")
+}
+
+
 
 plotChains1 <- function () {
   #
@@ -209,3 +280,26 @@ plotChains1 <- function () {
     labs (x = "Number of chained tags", y = "Count", title="Histogram of tag chains")
 }
 
+# plotChains2 <- function () {
+#   #
+#   #  plot emotion tags length
+#   # 
+#   
+#   chain  <- gTags %>%
+#     group_by(chain) %>% 
+#     summarize (sum = length(id)-1)
+#   
+#   histo <- chain %>%
+#     group_by (sum) %>%
+#     summarize (hist = length(chain))
+#   
+#   ggplot (chain, aes(x=sum)) + 
+#     geom_histogram (binwidth=1, colour="black", fill="white") + 
+#     geom_vline(aes(xintercept=mean(sum)),
+#                color="red", linetype="dashed", size=1) +
+#     annotate (geom="text", x=mean(chain$sum), y = 0.8 * max(histo$hist), hjust=-0.2, 
+#               label=paste ("mean =", round (mean(chain$sum)), 2)) + 
+#     annotate (geom="text", x=max(chain$sum), y = 0.1 * max(histo$hist), hjust= 1, 
+#               label=paste ("max =", max(chain$sum))) + 
+#     labs (x = "Number of chained tags", y = "Count", title="Histogram of tag chains")
+# }
