@@ -5,6 +5,41 @@ library (lubridate)
 # define tags
 kTags <- c("happy", "sad", "excited", "bored", "cool", "warm", "go", "stay")
 
+# Tag data frame 
+# > str(gTags)
+# 'data.frame':  9229 obs. of  6 variables:
+#   $ id      : num - unique identifier of tag
+# $ chain   : num  - unique identifier of chain.  chain = id for original tag
+# $ tag     : Factor w/ 8 levels kTag
+# $ strength: int  (1-3)
+# $ date    : POSIXct,  date & time placed
+# $ userID  : num  ID in user pool
+
+# user database
+# > str(gUserPool)
+# 'data.frame':  10000 obs. of  4 variables:
+# $ userID    : int  unique identifier for a user
+# $ gender    : Factor w/ 2 levels "Female","Male"
+# $ age       : num  32.6 26.6 32.2 22.3 35.8 ...
+
+###############################################################################################################  
+#
+#  TRIAL SIMULATOR
+#
+###############################################################################################################  
+#  run SimulateTrial ()
+#  run saveAll () to save all plots to file
+
+
+
+# $ enthusiasm: num  0.0957 0.9771 0.9721 0.5591 0.1929 ...  only relevant for simulator
+
+# currently active users - only for simulator
+#gActiveUsers - subset of gUserPool userIDs
+
+# currently inactive users - only for simulator
+#gInactiveUsers  - subset of gUserPool userIDs
+
 #define probability of tag occuring in a new post
 if (!exists ("kNewProb")){
   kNewProb <- runif (length (kTags))
@@ -19,7 +54,6 @@ if (!exists ("kReactProb")){
 
 # ratio new tag/total tags
 kNewTagRatio <- 1/5
-
 
 
 GenerateUsers <- function (num.users) {
@@ -127,7 +161,7 @@ SimulateDay <- function (date){
          function (u) {GenerateReactionTag(date, u)})
 }
 
-SetupData <- function () {
+SimulateTrial <- function () {
   gUserPool <<- GenerateUsers (10000)
   gActiveUsers <<- c()
   gInactiveUsers <<- 1:nrow(gUserPool)
@@ -146,10 +180,11 @@ SetupData <- function () {
   gTags
 }
 
-  
+###############################################################################################################  
 #
 #  Plot the data !
 #
+###############################################################################################################  
 
 saveggplot <- function (plot_f){
   filename <- paste ("tagproject/", as.character(substitute(plot_f)), ".png", sep="")
@@ -163,7 +198,7 @@ saveAll <- function () {
   saveggplot(plotUsers3)
   saveggplot(plotUsers4)
   saveggplot(plotUsers5)
-  saveggplot(plotChains1)
+  saveggplot(plotChains1) 
   saveggplot(plotChains2)
 }
 
@@ -280,26 +315,24 @@ plotChains1 <- function () {
     labs (x = "Number of chained tags", y = "Count", title="Histogram of tag chains")
 }
 
-# plotChains2 <- function () {
-#   #
-#   #  plot emotion tags length
-#   # 
-#   
-#   chain  <- gTags %>%
-#     group_by(chain) %>% 
-#     summarize (sum = length(id)-1)
-#   
-#   histo <- chain %>%
-#     group_by (sum) %>%
-#     summarize (hist = length(chain))
-#   
-#   ggplot (chain, aes(x=sum)) + 
-#     geom_histogram (binwidth=1, colour="black", fill="white") + 
-#     geom_vline(aes(xintercept=mean(sum)),
-#                color="red", linetype="dashed", size=1) +
-#     annotate (geom="text", x=mean(chain$sum), y = 0.8 * max(histo$hist), hjust=-0.2, 
-#               label=paste ("mean =", round (mean(chain$sum)), 2)) + 
-#     annotate (geom="text", x=max(chain$sum), y = 0.1 * max(histo$hist), hjust= 1, 
-#               label=paste ("max =", max(chain$sum))) + 
-#     labs (x = "Number of chained tags", y = "Count", title="Histogram of tag chains")
-# }
+plotChains2 <- function () {
+  #
+  #  plot emotion tags length
+  # 
+  cbPalette <- c("happy"="#999999", "sad"="#E69F00", "excited"="#56B4E9",
+                "bored"="#009E73", "cool"="#F0E442", "warm"="#0072B2", "go"="#D55E00", "stay"="#CC79A7")
+
+  
+  chain  <- gTags %>%
+    transform(origTag = gTags[chain, "tag"]) %>%
+    filter (tag != chain) %>%  # count only the chained tags
+    group_by(origTag, tag) %>% 
+    summarize (sum = length(id))
+
+  ggplot (chain, aes(x=tag, y=sum, colour=tag)) + 
+    facet_wrap(~origTag) +
+    geom_point() +
+    scale_color_manual (values=cbPalette) +
+    labs (x = "Response", y = "Count", title="Responses per original tag")
+}
+
